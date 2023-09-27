@@ -1,24 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ethers } from "ethers";
 import deploy from "./deploy";
-import Escrow from "./Escrow";
+import Escrow, { IEscrow } from "./Escrow";
+import { Button, Card, Col, Input, InputRef, Row, Space, message } from "antd";
+import { UserOutlined } from "@ant-design/icons/lib/icons";
+// export { ReactComponent as EthIcon } from "../public/eth-logo.svg";
+import { ReactComponent as EthIcon } from "./icons/eth-logo.svg";
 
 const provider = new ethers.providers.Web3Provider((window as any).ethereum);
 
-export async function approve(
-  escrowContract: ethers.Contract,
-  signer: ethers.providers.JsonRpcSigner | undefined
-) {
-  if (!signer) return;
-
-  const approveTxn = await escrowContract.connect(signer).approve();
-  await approveTxn.wait();
-}
-
 function App() {
-  const [escrows, setEscrows] = useState([]);
+  const [escrows, setEscrows] = useState<IEscrow[]>([]);
   const [account, setAccount] = useState();
   const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
+
+  const arbiterAddressRef = useRef<InputRef>(null);
+  const beneficiaryAddressRef = useRef<InputRef>(null);
+  const amountRef = useRef<InputRef>(null);
 
   useEffect(() => {
     async function getAccounts() {
@@ -32,69 +30,85 @@ function App() {
   }, [account]);
 
   async function newContract() {
-    // const beneficiary = document.getElementById("beneficiary").value;
-    // const arbiter = document.getElementById("arbiter").value;
-    // const value = ethers.BigNumber.from(document.getElementById("wei").value);
-    // const escrowContract = await deploy(signer, arbiter, beneficiary, value);
-    // const escrow = {
-    //   address: escrowContract.address,
-    //   arbiter,
-    //   beneficiary,
-    //   value: value.toString(),
-    //   handleApprove: async () => {
-    //     escrowContract.on("Approved", () => {
-    //       document.getElementById(escrowContract.address).className =
-    //         "complete";
-    //       document.getElementById(escrowContract.address).innerText =
-    //         "✓ It's been approved!";
-    //     });
-    //     await approve(escrowContract, signer);
-    //   },
-    // };
-    // setEscrows([...escrows, escrow]);
+    const beneficiary = beneficiaryAddressRef.current?.input?.value;
+    const arbiter = arbiterAddressRef.current?.input?.value;
+    const amount = amountRef.current?.input?.value;
+
+    if (!beneficiary || !arbiter || !amount) return;
+
+    const value = ethers.utils.parseEther(amount);
+
+    let escrowContract: ethers.Contract | undefined = undefined;
+    try {
+      escrowContract = await deploy(signer, arbiter, beneficiary, value);
+    } catch (error) {
+      console.log(error);
+      alert((error as any).message);
+      return;
+    }
+
+    const escrow: IEscrow = {
+      arbiter,
+      beneficiary,
+      value: value.toString(),
+      escrowContract,
+    };
+    setEscrows([...escrows, escrow]);
   }
 
   return (
-    <>
-      <div>
-        <label>
-          Arbiter Address
-          <input type="text" id="arbiter" />
-        </label>
+    <Row gutter={24} style={{ margin: 16 }}>
+      <Col span={12}>
+        <Card title="New Contract">
+          <Input
+            pattern="^0[xX][0-9a-fA-f]+$"
+            ref={arbiterAddressRef}
+            size="large"
+            placeholder="Arbiter Address"
+            prefix={<UserOutlined />}
+          />
+          <br />
+          <br />
+          <Input
+            ref={beneficiaryAddressRef}
+            size="large"
+            placeholder="Beneficiary Address"
+            prefix={<UserOutlined />}
+          />
+          <br />
+          <br />
 
-        <label>
-          Beneficiary Address
-          <input type="text" id="beneficiary" />
-        </label>
+          <Input
+            ref={amountRef}
+            size="large"
+            placeholder="Amount"
+            prefix={<EthIcon height={24} />}
+            suffix="ETH"
+          />
+          <br />
+          <br />
 
-        <label>
-          Deposit Amount (in Wei)
-          <input type="text" id="wei" />
-        </label>
+          <Button
+            type="primary"
+            block
+            onClick={(e) => {
+              e.preventDefault();
 
-        <div
-          className="button"
-          id="deploy"
-          onClick={(e) => {
-            e.preventDefault();
-
-            newContract();
-          }}
-        >
-          Deploy
-        </div>
-      </div>
-
-      <div className="existing-contracts">
-        <h1> Existing Contracts </h1>
-
-        <div id="container">
-          {/* {escrows.map((escrow) => {
-            return <Escrow key={escrow.address} {...escrow} />;
-          })} */}
-        </div>
-      </div>
-    </>
+              newContract();
+            }}
+          >
+            Deploy
+          </Button>
+        </Card>
+      </Col>
+      <Col span={12}>
+        <Card title="Existing Contracts">
+          {escrows.map((escrow: IEscrow) => {
+            return <Escrow key={escrow.escrowContract.address} {...escrow} />;
+          })}
+        </Card>
+      </Col>
+    </Row>
   );
 }
 
