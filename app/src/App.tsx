@@ -13,6 +13,7 @@ function App() {
   const [escrows, setEscrows] = useState<IEscrow[]>([]);
   const [account, setAccount] = useState();
   const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
+  const [loading, setLoading] = useState(false);
 
   const arbiterAddressRef = useRef<InputRef>(null);
   const beneficiaryAddressRef = useRef<InputRef>(null);
@@ -38,23 +39,33 @@ function App() {
 
     const value = ethers.utils.parseEther(amount);
 
+    setLoading(true);
     let escrowContract: ethers.Contract | undefined = undefined;
     try {
       escrowContract = await deploy(signer, arbiter, beneficiary, value);
     } catch (error) {
       console.log(error);
       alert((error as any).message);
+      setLoading(false);
       return;
     }
 
     const escrow: IEscrow = {
       arbiter,
       beneficiary,
-      value: value.toString(),
+      value: amount.toString(),
       escrowContract,
     };
+    setLoading(false);
+
     setEscrows([...escrows, escrow]);
   }
+
+  const handleDeployContract = async (e: any) => {
+    e.preventDefault();
+
+    await newContract();
+  };
 
   return (
     <Row gutter={24} style={{ margin: 16 }}>
@@ -91,11 +102,8 @@ function App() {
           <Button
             type="primary"
             block
-            onClick={(e) => {
-              e.preventDefault();
-
-              newContract();
-            }}
+            loading={loading}
+            onClick={handleDeployContract}
           >
             Deploy
           </Button>

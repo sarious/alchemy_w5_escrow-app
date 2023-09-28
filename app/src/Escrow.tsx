@@ -29,19 +29,23 @@ export default function Escrow({
   escrowContract,
 }: IEscrow) {
   const [approved, setApproved] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleApproveClick = async (e: any) => {
     e.preventDefault();
+    setLoading(true);
 
     escrowContract.once("Approved", () => {
       setApproved(true);
+      setLoading(false);
     });
 
-    const signer = await provider.getSigner();
+    const signer = provider.getSigner();
 
     try {
       await approve(escrowContract, signer);
     } catch (error) {
+      setLoading(false);
       console.log(error);
       alert((error as any).message);
       return;
@@ -50,15 +54,26 @@ export default function Escrow({
 
   return (
     <Card>
+      <Typography.Text strong>Contract: </Typography.Text>
+      <Typography.Text copyable>{escrowContract.address}</Typography.Text>
+      <br />
       <Typography.Text strong>Arbiter: </Typography.Text>
       <Typography.Text copyable>{arbiter}</Typography.Text>
+      <br />
       <Typography.Text strong>Beneficiary: </Typography.Text>
       <Typography.Text copyable>{beneficiary}</Typography.Text>
+      <br />
       <Typography.Text strong>Value: </Typography.Text>
-      <Typography.Text>{value}</Typography.Text>
+      <Typography.Text>{value} ETH</Typography.Text>
+      <br />
       {approved && <div>✓ It's been approved!</div>}
       {!approved && (
-        <Button block type="primary" onClick={handleApproveClick}>
+        <Button
+          block
+          type="primary"
+          onClick={handleApproveClick}
+          loading={loading}
+        >
           Approve
         </Button>
       )}
