@@ -23,11 +23,12 @@ export interface IEscrow {
 const provider = new ethers.providers.Web3Provider((window as any).ethereum);
 
 export default function Escrow({
+  className,
   arbiter,
   beneficiary,
   value,
   escrowContract,
-}: IEscrow) {
+}: IEscrow & { className?: string }) {
   const [approved, setApproved] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -53,7 +54,7 @@ export default function Escrow({
   };
 
   return (
-    <Card>
+    <Card className={className}>
       <Typography.Text strong>Contract: </Typography.Text>
       <Typography.Text copyable>{escrowContract.address}</Typography.Text>
       <br />

@@ -1,0 +1,8 @@
+.deployContractCard {
+  max-width: 500px;
+  margin: 16px auto;
+}
+
+.escrowCard {
+  min-width: 500px;
+}

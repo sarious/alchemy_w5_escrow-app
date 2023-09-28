@@ -2,10 +2,21 @@ import { useEffect, useRef, useState } from "react";
 import { ethers } from "ethers";
 import deploy from "./deploy";
 import Escrow, { IEscrow } from "./Escrow";
-import { Button, Card, Col, Input, InputRef, Row, Space, message } from "antd";
+import {
+  Button,
+  Card,
+  Col,
+  Input,
+  InputRef,
+  Row,
+  Space,
+  Typography,
+  message,
+} from "antd";
 import { UserOutlined } from "@ant-design/icons/lib/icons";
 // export { ReactComponent as EthIcon } from "../public/eth-logo.svg";
 import { ReactComponent as EthIcon } from "./icons/eth-logo.svg";
+import styles from "./App.module.css";
 
 const provider = new ethers.providers.Web3Provider((window as any).ethereum);
 
@@ -68,55 +79,66 @@ function App() {
   };
 
   return (
-    <Row gutter={24} style={{ margin: 16 }}>
-      <Col span={12}>
-        <Card title="New Contract">
-          <Input
-            pattern="^0[xX][0-9a-fA-f]+$"
-            ref={arbiterAddressRef}
-            size="large"
-            placeholder="Arbiter Address"
-            prefix={<UserOutlined />}
-          />
-          <br />
-          <br />
-          <Input
-            ref={beneficiaryAddressRef}
-            size="large"
-            placeholder="Beneficiary Address"
-            prefix={<UserOutlined />}
-          />
-          <br />
-          <br />
+    <>
+      {/* <Row gutter={24} style={{ margin: 16 }}>
+       <Col span={12}> */}
+      <Card title="New Contract" className={styles.deployContractCard}>
+        <Input
+          pattern="^0[xX][0-9a-fA-f]+$"
+          ref={arbiterAddressRef}
+          size="large"
+          placeholder="Arbiter Address"
+          prefix={<UserOutlined />}
+        />
+        <br />
+        <br />
+        <Input
+          ref={beneficiaryAddressRef}
+          size="large"
+          placeholder="Beneficiary Address"
+          prefix={<UserOutlined />}
+        />
+        <br />
+        <br />
 
-          <Input
-            ref={amountRef}
-            size="large"
-            placeholder="Amount"
-            prefix={<EthIcon height={24} />}
-            suffix="ETH"
-          />
-          <br />
-          <br />
+        <Input
+          ref={amountRef}
+          size="large"
+          placeholder="Amount"
+          prefix={<EthIcon height={24} />}
+          suffix="ETH"
+        />
+        <br />
+        <br />
 
-          <Button
-            type="primary"
-            block
-            loading={loading}
-            onClick={handleDeployContract}
-          >
-            Deploy
-          </Button>
-        </Card>
-      </Col>
-      <Col span={12}>
-        <Card title="Existing Contracts">
+        <Button
+          type="primary"
+          block
+          loading={loading}
+          onClick={handleDeployContract}
+        >
+          Deploy
+        </Button>
+      </Card>
+      {/* </Col>
+       <Col span={12}> */}
+      <Space direction="vertical">
+        <Typography.Title level={5}>Existing Contracts</Typography.Title>
+        <Space size="large" align="center" wrap>
           {escrows.map((escrow: IEscrow) => {
-            return <Escrow key={escrow.escrowContract.address} {...escrow} />;
+            return (
+              <Escrow
+                className={styles.escrowCard}
+                key={escrow.escrowContract.address}
+                {...escrow}
+              />
+            );
           })}
-        </Card>
-      </Col>
-    </Row>
+        </Space>
+      </Space>
+      {/* </Col>
+    </Row> */}
+    </>
   );
 }
 
