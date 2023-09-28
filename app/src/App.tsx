@@ -2,21 +2,22 @@ import { useEffect, useRef, useState } from "react";
 import { ethers } from "ethers";
 import deploy from "./deploy";
 import Escrow, { IEscrow } from "./Escrow";
+
+import { ReactComponent as EthIcon } from "./icons/eth-logo.svg";
 import {
   Button,
   Card,
-  Col,
+  CardBody,
+  CardHeader,
+  Flex,
+  Grid,
+  GridItem,
+  Heading,
   Input,
-  InputRef,
-  Row,
-  Space,
-  Typography,
-  message,
-} from "antd";
-import { UserOutlined } from "@ant-design/icons/lib/icons";
-// export { ReactComponent as EthIcon } from "../public/eth-logo.svg";
-import { ReactComponent as EthIcon } from "./icons/eth-logo.svg";
-import styles from "./App.module.css";
+  InputGroup,
+  InputLeftAddon,
+  InputRightAddon,
+} from "@chakra-ui/react";
 
 const provider = new ethers.providers.Web3Provider((window as any).ethereum);
 
@@ -26,9 +27,9 @@ function App() {
   const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
   const [loading, setLoading] = useState(false);
 
-  const arbiterAddressRef = useRef<InputRef>(null);
-  const beneficiaryAddressRef = useRef<InputRef>(null);
-  const amountRef = useRef<InputRef>(null);
+  const arbiterAddressRef = useRef<HTMLInputElement>(null);
+  const beneficiaryAddressRef = useRef<HTMLInputElement>(null);
+  const amountRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function getAccounts() {
@@ -42,9 +43,9 @@ function App() {
   }, [account]);
 
   async function newContract() {
-    const beneficiary = beneficiaryAddressRef.current?.input?.value;
-    const arbiter = arbiterAddressRef.current?.input?.value;
-    const amount = amountRef.current?.input?.value;
+    const beneficiary = beneficiaryAddressRef.current?.value;
+    const arbiter = arbiterAddressRef.current?.value;
+    const amount = amountRef.current?.value;
 
     if (!beneficiary || !arbiter || !amount) return;
 
@@ -80,64 +81,61 @@ function App() {
 
   return (
     <>
-      {/* <Row gutter={24} style={{ margin: 16 }}>
-       <Col span={12}> */}
-      <Card title="New Contract" className={styles.deployContractCard}>
-        <Input
-          pattern="^0[xX][0-9a-fA-f]+$"
-          ref={arbiterAddressRef}
-          size="large"
-          placeholder="Arbiter Address"
-          prefix={<UserOutlined />}
-        />
-        <br />
-        <br />
-        <Input
-          ref={beneficiaryAddressRef}
-          size="large"
-          placeholder="Beneficiary Address"
-          prefix={<UserOutlined />}
-        />
-        <br />
-        <br />
+      <Card m={4} margin="14px auto" maxWidth="560">
+        <CardHeader>
+          <Heading size="md">New Contract</Heading>
+        </CardHeader>
+        <CardBody as={Flex} direction="column" gap={4}>
+          <InputGroup>
+            <InputLeftAddon children="X" />
+            <Input
+              ref={arbiterAddressRef}
+              size="md"
+              placeholder="Arbiter Address"
+            />
+          </InputGroup>
 
-        <Input
-          ref={amountRef}
-          size="large"
-          placeholder="Amount"
-          prefix={<EthIcon height={24} />}
-          suffix="ETH"
-        />
-        <br />
-        <br />
+          <InputGroup>
+            <InputLeftAddon children="X" />
+            <Input
+              ref={beneficiaryAddressRef}
+              size="md"
+              placeholder="Beneficiary Address"
+            />
+          </InputGroup>
 
-        <Button
-          type="primary"
-          block
-          loading={loading}
-          onClick={handleDeployContract}
-        >
-          Deploy
-        </Button>
+          <InputGroup>
+            <InputLeftAddon children={<EthIcon height={24} />} />
+            <Input
+              ref={amountRef}
+              type="number"
+              size="md"
+              placeholder="Amount"
+            />
+            <InputRightAddon children="ETH" />
+          </InputGroup>
+
+          <Button isLoading={loading} onClick={handleDeployContract}>
+            Deploy
+          </Button>
+        </CardBody>
       </Card>
-      {/* </Col>
-       <Col span={12}> */}
-      <Space direction="vertical">
-        <Typography.Title level={5}>Existing Contracts</Typography.Title>
-        <Space size="large" align="center" wrap>
+      <Flex direction="column" m={4}>
+        <Heading size="md" mb={4}>
+          Existing Contracts
+        </Heading>
+        <Grid gap={4} templateColumns="repeat(auto-fill, minmax(550px , 1fr))">
           {escrows.map((escrow: IEscrow) => {
             return (
-              <Escrow
-                className={styles.escrowCard}
+              <GridItem
+                as={Escrow}
                 key={escrow.escrowContract.address}
                 {...escrow}
               />
             );
           })}
-        </Space>
-      </Space>
-      {/* </Col>
-    </Row> */}
+        </Grid>
+      </Flex>
     </>
   );
 }

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ethers } from "ethers";
-import { Button, Typography } from "antd";
-import Card from "antd/es/card/Card";
+import { Button, Card, CardBody, Flex, Text } from "@chakra-ui/react";
 
 export async function approve(
   escrowContract: ethers.Contract,
@@ -54,30 +53,35 @@ export default function Escrow({
   };
 
   return (
-    <Card className={className}>
-      <Typography.Text strong>Contract: </Typography.Text>
-      <Typography.Text copyable>{escrowContract.address}</Typography.Text>
-      <br />
-      <Typography.Text strong>Arbiter: </Typography.Text>
-      <Typography.Text copyable>{arbiter}</Typography.Text>
-      <br />
-      <Typography.Text strong>Beneficiary: </Typography.Text>
-      <Typography.Text copyable>{beneficiary}</Typography.Text>
-      <br />
-      <Typography.Text strong>Value: </Typography.Text>
-      <Typography.Text>{value} ETH</Typography.Text>
-      <br />
-      {approved && <div>✓ It's been approved!</div>}
-      {!approved && (
-        <Button
-          block
-          type="primary"
-          onClick={handleApproveClick}
-          loading={loading}
-        >
-          Approve
-        </Button>
-      )}
+    <Card>
+      <CardBody as={Flex} direction="column">
+        <Flex gap={2}>
+          <Text as="b">Contract: </Text>
+          <Text>{escrowContract.address}</Text>
+        </Flex>
+
+        <Flex gap={2}>
+          <Text as="b">Arbiter: </Text>
+          <Text>{arbiter}</Text>
+        </Flex>
+
+        <Flex gap={2}>
+          <Text as="b">Beneficiary: </Text>
+          <Text>{beneficiary}</Text>
+        </Flex>
+
+        <Flex gap={2}>
+          <Text as="b">Value: </Text>
+          <Text>{value} ETH</Text>
+        </Flex>
+
+        {approved && <div>✓ It's been approved!</div>}
+        {!approved && (
+          <Button isLoading={loading} onClick={handleApproveClick}>
+            Approve
+          </Button>
+        )}
+      </CardBody>
     </Card>
   );
 }
