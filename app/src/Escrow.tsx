@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { ethers } from "ethers";
-import { Button, Card, CardBody, Flex, Text } from "@chakra-ui/react";
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Flex,
+  Text,
+} from "@chakra-ui/react";
 
 export async function approve(
   escrowContract: ethers.Contract,
@@ -16,19 +23,20 @@ export interface IEscrow {
   arbiter: string;
   beneficiary: string;
   value: string;
+  isApproved: boolean;
   escrowContract: ethers.Contract;
 }
 
 const provider = new ethers.providers.Web3Provider((window as any).ethereum);
 
 export default function Escrow({
-  className,
   arbiter,
   beneficiary,
   value,
+  isApproved,
   escrowContract,
 }: IEscrow & { className?: string }) {
-  const [approved, setApproved] = useState(false);
+  const [approved, setApproved] = useState(isApproved);
   const [loading, setLoading] = useState(false);
 
   const handleApproveClick = async (e: any) => {
@@ -54,12 +62,10 @@ export default function Escrow({
 
   return (
     <Card>
-      <CardBody as={Flex} direction="column">
-        <Flex gap={2}>
-          <Text as="b">Contract: </Text>
-          <Text>{escrowContract.address}</Text>
-        </Flex>
-
+      <CardHeader as={Flex}>
+        <Text as="b">Contract {escrowContract.address}</Text>
+      </CardHeader>
+      <CardBody as={Flex} direction="column" gap={2} pt={0}>
         <Flex gap={2}>
           <Text as="b">Arbiter: </Text>
           <Text>{arbiter}</Text>
@@ -75,9 +81,21 @@ export default function Escrow({
           <Text>{value} ETH</Text>
         </Flex>
 
-        {approved && <div>✓ It's been approved!</div>}
+        {approved && (
+          <Button
+            bgColor="green.100"
+            disabled
+            _hover={{ bhColor: "green.100" }}
+          >
+            ✓ It's been approved!
+          </Button>
+        )}
         {!approved && (
-          <Button isLoading={loading} onClick={handleApproveClick}>
+          <Button
+            isLoading={loading}
+            loadingText="Approving"
+            onClick={handleApproveClick}
+          >
             Approve
           </Button>
         )}

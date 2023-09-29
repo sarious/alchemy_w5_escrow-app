@@ -18,6 +18,7 @@ import {
   InputLeftAddon,
   InputRightAddon,
 } from "@chakra-ui/react";
+import { getContract } from "./deploy";
 
 const provider = new ethers.providers.Web3Provider((window as any).ethereum);
 
@@ -30,6 +31,7 @@ function App() {
   const arbiterAddressRef = useRef<HTMLInputElement>(null);
   const beneficiaryAddressRef = useRef<HTMLInputElement>(null);
   const amountRef = useRef<HTMLInputElement>(null);
+  const addressRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function getAccounts() {
@@ -61,22 +63,65 @@ function App() {
       setLoading(false);
       return;
     }
+    setLoading(false);
+
+    if (!escrowContract) return;
 
     const escrow: IEscrow = {
       arbiter,
       beneficiary,
       value: amount.toString(),
+      isApproved: false,
       escrowContract,
     };
-    setLoading(false);
 
-    setEscrows([...escrows, escrow]);
+    setEscrows((escrows) => [escrow, ...escrows]);
   }
 
   const handleDeployContract = async (e: any) => {
     e.preventDefault();
 
     await newContract();
+  };
+
+  const handleAddingContract = async (e: any) => {
+    e.preventDefault();
+
+    const contractAddress = addressRef.current?.value;
+    if (!contractAddress) return;
+
+    const escrowContract = await getContract(contractAddress, signer);
+    const arbiter = await escrowContract.arbiter();
+    const beneficiary = await escrowContract.beneficiary();
+    const isApproved = await escrowContract.isApproved();
+    const amount = await provider.getBalance(contractAddress);
+    const value = ethers.utils.formatEther(amount);
+    const escrow: IEscrow = {
+      arbiter,
+      beneficiary,
+      value,
+      isApproved,
+      escrowContract,
+    };
+
+    if (addressRef.current) {
+      // @ts-ignore (us this comment if typescript raises an error)
+      addressRef.current.value = "";
+    }
+    setEscrows((escrows) => {
+      const index = escrows.findIndex(
+        (value) =>
+          value.escrowContract.address === escrow.escrowContract.address
+      );
+      if (index >= 0) {
+        return [
+          escrow,
+          ...escrows.slice(0, index),
+          ...escrows.slice(index + 1, escrows.length - 1),
+        ];
+      }
+      return [escrow, ...escrows];
+    });
   };
 
   return (
@@ -115,7 +160,11 @@ function App() {
             <InputRightAddon children="ETH" />
           </InputGroup>
 
-          <Button isLoading={loading} onClick={handleDeployContract}>
+          <Button
+            isLoading={loading}
+            loadingText="Deploying"
+            onClick={handleDeployContract}
+          >
             Deploy
           </Button>
         </CardBody>
@@ -125,6 +174,23 @@ function App() {
           Existing Contracts
         </Heading>
         <Grid gap={4} templateColumns="repeat(auto-fill, minmax(550px , 1fr))">
+          <GridItem as={Card}>
+            <CardHeader>
+              <Heading size="md">Add Contract</Heading>
+            </CardHeader>
+            <CardBody as={Flex} direction="column" gap={4}>
+              <InputGroup>
+                <InputLeftAddon children="X" />
+                <Input
+                  ref={addressRef}
+                  size="md"
+                  placeholder="Contract Address"
+                />
+              </InputGroup>
+
+              <Button onClick={handleAddingContract}>Add Contract</Button>
+            </CardBody>
+          </GridItem>
           {escrows.map((escrow: IEscrow) => {
             return (
               <GridItem
