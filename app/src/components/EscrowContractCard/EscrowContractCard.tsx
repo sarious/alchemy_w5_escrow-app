@@ -1,41 +1,25 @@
-import { useState } from "react";
-import { ethers } from "ethers";
+import { FC, useState } from "react";
+import { EscrowContractCardProps } from ".";
 import {
-  Button,
   Card,
-  CardBody,
   CardHeader,
   Flex,
+  CloseButton,
+  CardBody,
+  Button,
   Text,
 } from "@chakra-ui/react";
+import { approve, getWalletSigner } from "../../providers/getSigner";
+import { useEscrowActionsContext } from "../../providers/EscrowListProvider";
 
-export async function approve(
-  escrowContract: ethers.Contract,
-  signer: ethers.providers.JsonRpcSigner | undefined
-) {
-  if (!signer) return;
-
-  const approveTxn = await escrowContract.connect(signer).approve();
-  await approveTxn.wait();
-}
-
-export interface IEscrow {
-  arbiter: string;
-  beneficiary: string;
-  value: string;
-  isApproved: boolean;
-  escrowContract: ethers.Contract;
-}
-
-const provider = new ethers.providers.Web3Provider((window as any).ethereum);
-
-export default function Escrow({
+export const EscrowContractCard: FC<EscrowContractCardProps> = ({
   arbiter,
   beneficiary,
   value,
   isApproved,
   escrowContract,
-}: IEscrow & { className?: string }) {
+}) => {
+  const { removeEscrow } = useEscrowActionsContext();
   const [approved, setApproved] = useState(isApproved);
   const [loading, setLoading] = useState(false);
 
@@ -48,9 +32,8 @@ export default function Escrow({
       setLoading(false);
     });
 
-    const signer = provider.getSigner();
-
     try {
+      const signer = await getWalletSigner();
       await approve(escrowContract, signer);
     } catch (error) {
       setLoading(false);
@@ -60,10 +43,15 @@ export default function Escrow({
     }
   };
 
+  const deleteEscrowContract = () => {
+    removeEscrow(escrowContract.address);
+  };
+
   return (
     <Card>
-      <CardHeader as={Flex}>
+      <CardHeader as={Flex} justifyContent="space-between" alignItems="center">
         <Text as="b">Contract {escrowContract.address}</Text>
+        <CloseButton onClick={deleteEscrowContract} size="md" />
       </CardHeader>
       <CardBody as={Flex} direction="column" gap={2} pt={0}>
         <Flex gap={2}>
@@ -102,4 +90,4 @@ export default function Escrow({
       </CardBody>
     </Card>
   );
-}
+};
