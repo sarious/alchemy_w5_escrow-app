@@ -48,7 +48,7 @@ export const EscrowContractCard: FC<EscrowContractCardProps> = ({
   };
 
   return (
-    <Card>
+    <Card bgColor={approved ? "green.100" : "red.100"}>
       <CardHeader as={Flex} justifyContent="space-between" alignItems="center">
         <Text as="b">Contract {escrowContract.address}</Text>
         <CloseButton onClick={deleteEscrowContract} size="md" />
@@ -71,9 +71,9 @@ export const EscrowContractCard: FC<EscrowContractCardProps> = ({
 
         {approved && (
           <Button
-            bgColor="green.100"
+            bgColor="transparent"
             disabled
-            _hover={{ bhColor: "green.100" }}
+            _hover={{ bhColor: "tranparent" }}
           >
             ✓ It's been approved!
           </Button>

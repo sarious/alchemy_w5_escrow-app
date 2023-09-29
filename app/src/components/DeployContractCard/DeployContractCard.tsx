@@ -75,7 +75,6 @@ export const DeployContractCard: FC<DeployContractCardProps> = (props) => {
       </CardHeader>
       <CardBody as={Flex} direction="column" gap={4}>
         <InputGroup>
-          <InputLeftAddon children="X" />
           <Input
             ref={arbiterAddressRef}
             size="md"
@@ -84,7 +83,6 @@ export const DeployContractCard: FC<DeployContractCardProps> = (props) => {
         </InputGroup>
 
         <InputGroup>
-          <InputLeftAddon children="X" />
           <Input
             ref={beneficiaryAddressRef}
             size="md"
