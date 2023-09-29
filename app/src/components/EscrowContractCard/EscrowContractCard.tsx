@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { EscrowContractCardProps } from ".";
 import {
   Card,
@@ -23,14 +23,18 @@ export const EscrowContractCard: FC<EscrowContractCardProps> = ({
   const [approved, setApproved] = useState(isApproved);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (!approved) {
+      escrowContract.once("Approved", () => {
+        setApproved(true);
+        setLoading(false);
+      });
+    }
+  }, []);
+
   const handleApproveClick = async (e: any) => {
     e.preventDefault();
     setLoading(true);
-
-    escrowContract.once("Approved", () => {
-      setApproved(true);
-      setLoading(false);
-    });
 
     try {
       const signer = await getWalletSigner();

@@ -10,10 +10,8 @@ import {
   Input,
   Button,
 } from "@chakra-ui/react";
-import { ethers } from "ethers";
-import { getContract } from "../../deploy";
 import { useEscrowActionsContext } from "../../providers/EscrowListProvider";
-import { getWalletSigner, getContractBalance } from "../../providers/getSigner";
+import { getEscrowContract } from "../../providers/getSigner";
 import { IEscrow } from "../EscrowContractCard";
 
 export const AddContractCard: FC<AddContractCardProps> = () => {
@@ -27,21 +25,7 @@ export const AddContractCard: FC<AddContractCardProps> = () => {
     const contractAddress = addressRef.current?.value;
     if (!contractAddress) return;
 
-    const signer = await getWalletSigner();
-    const escrowContract = await getContract(contractAddress, signer);
-    const arbiter = await escrowContract.arbiter();
-    const beneficiary = await escrowContract.beneficiary();
-    const isApproved = await escrowContract.isApproved();
-    const amount = await getContractBalance(contractAddress);
-    const value = ethers.utils.formatEther(amount);
-    const escrow: IEscrow = {
-      arbiter,
-      beneficiary,
-      value,
-      isApproved,
-      escrowContract,
-    };
-
+    const escrow: IEscrow = await getEscrowContract(contractAddress);
     addEscrow(escrow);
 
     if (addressRef.current) {

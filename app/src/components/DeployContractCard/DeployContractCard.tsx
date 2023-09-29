@@ -81,7 +81,6 @@ export const DeployContractCard: FC<DeployContractCardProps> = (props) => {
             placeholder="Arbiter Address"
           />
         </InputGroup>
-
         <InputGroup>
           <Input
             ref={beneficiaryAddressRef}
@@ -89,13 +88,11 @@ export const DeployContractCard: FC<DeployContractCardProps> = (props) => {
             placeholder="Beneficiary Address"
           />
         </InputGroup>
-
         <InputGroup>
           <InputLeftAddon children={<EthIcon height={24} />} />
           <Input ref={amountRef} type="number" size="md" placeholder="Amount" />
           <InputRightAddon children="ETH" />
         </InputGroup>
-
         <Button
           isLoading={loading}
           loadingText="Deploying"

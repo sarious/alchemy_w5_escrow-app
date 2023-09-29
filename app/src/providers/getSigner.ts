@@ -1,4 +1,6 @@
 import { ethers } from "ethers";
+import { getContract } from "../deploy";
+import { IEscrow } from "../components/EscrowContractCard";
 
 export async function getWalletSigner() {
   const provider = new ethers.providers.Web3Provider((window as any).ethereum);
@@ -27,4 +29,24 @@ export async function approve(
 
   const approveTxn = await escrowContract.connect(signer).approve();
   await approveTxn.wait();
+}
+
+export async function getEscrowContract(contractAddress: string) {
+  const signer = await getWalletSigner();
+  const escrowContract = await getContract(contractAddress, signer);
+  const [arbiter, beneficiary, isApproved, amount] = await Promise.all([
+    escrowContract.arbiter(),
+    escrowContract.beneficiary(),
+    escrowContract.isApproved(),
+    getContractBalance(contractAddress),
+  ]);
+  const value = ethers.utils.formatEther(amount);
+  const escrow: IEscrow = {
+    arbiter,
+    beneficiary,
+    value,
+    isApproved,
+    escrowContract,
+  };
+  return escrow;
 }
