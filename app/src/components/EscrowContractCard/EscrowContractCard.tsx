@@ -8,9 +8,11 @@ import {
   CardBody,
   Button,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { approve, getWalletSigner } from "../../providers/getSigner";
 import { useEscrowActionsContext } from "../../providers/EscrowListProvider";
+import { getErrorDescription } from "../../utils/getErrorDescription";
 
 export const EscrowContractCard: FC<EscrowContractCardProps> = ({
   arbiter,
@@ -22,6 +24,7 @@ export const EscrowContractCard: FC<EscrowContractCardProps> = ({
   const { removeEscrow } = useEscrowActionsContext();
   const [approved, setApproved] = useState(isApproved);
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     if (!approved) {
@@ -34,15 +37,19 @@ export const EscrowContractCard: FC<EscrowContractCardProps> = ({
 
   const handleApproveClick = async (e: any) => {
     e.preventDefault();
-    setLoading(true);
 
+    setLoading(true);
     try {
       const signer = await getWalletSigner();
       await approve(escrowContract, signer);
     } catch (error) {
       setLoading(false);
       console.log(error);
-      alert((error as any).message);
+      toast({
+        title: "Error while approving contract.",
+        description: getErrorDescription(error),
+        status: "error",
+      });
       return;
     }
   };
@@ -69,8 +76,8 @@ export const EscrowContractCard: FC<EscrowContractCardProps> = ({
         </Flex>
 
         <Flex gap={2}>
-          <Text as="b">Value: </Text>
-          <Text>{value} ETH</Text>
+          <Text as="b">Balance: </Text>
+          <Text as={approved ? "s" : "p"}>{!approved ? value : 0} ETH</Text>
         </Flex>
 
         {approved && (

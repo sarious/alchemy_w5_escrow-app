@@ -18,37 +18,38 @@ import { ReactComponent as EthIcon } from "../../icons/eth-logo.svg";
 import { getWalletSigner } from "../../providers/getSigner";
 import { IEscrow } from "../EscrowContractCard";
 import { useEscrowActionsContext } from "../../providers/EscrowListProvider";
+import { useOperationHandling } from "../../hooks/useOperationHandling";
+
+const deployContract = async (
+  arbiter: string,
+  beneficiary: string,
+  value: ethers.BigNumber
+) => {
+  const signer = await getWalletSigner();
+  return deploy(signer, arbiter, beneficiary, value);
+};
 
 export const DeployContractCard: FC<DeployContractCardProps> = (props) => {
   const { addEscrow } = useEscrowActionsContext();
-  const [loading, setLoading] = useState(false);
+
+  const { loading, invoke } = useOperationHandling(
+    deployContract,
+    "Error while deploying contract."
+  );
 
   const arbiterAddressRef = useRef<HTMLInputElement>(null);
   const beneficiaryAddressRef = useRef<HTMLInputElement>(null);
   const amountRef = useRef<HTMLInputElement>(null);
 
   async function newContract() {
-    const beneficiary = beneficiaryAddressRef.current?.value;
     const arbiter = arbiterAddressRef.current?.value;
+    const beneficiary = beneficiaryAddressRef.current?.value;
     const amount = amountRef.current?.value;
 
     if (!beneficiary || !arbiter || !amount) return;
 
     const value = ethers.utils.parseEther(amount);
-
-    setLoading(true);
-    let escrowContract: ethers.Contract | undefined = undefined;
-    try {
-      const signer = await getWalletSigner();
-      escrowContract = await deploy(signer, arbiter, beneficiary, value);
-    } catch (error) {
-      console.log(error);
-      alert((error as any).message);
-      setLoading(false);
-      return;
-    }
-    setLoading(false);
-
+    const escrowContract = await invoke(arbiter, beneficiary, value);
     if (!escrowContract) return;
 
     const escrow: IEscrow = {
@@ -94,6 +95,7 @@ export const DeployContractCard: FC<DeployContractCardProps> = (props) => {
           <InputRightAddon children="ETH" />
         </InputGroup>
         <Button
+          type="submit"
           isLoading={loading}
           loadingText="Deploying"
           onClick={handleDeployContract}
