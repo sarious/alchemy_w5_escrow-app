@@ -11,7 +11,7 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { useEscrowActionsContext } from "../../providers/EscrowListProvider";
-import { getEscrowContract } from "../../providers/getSigner";
+import { getEscrowContract } from "../../contractApi/Escrow/getEscrowContract";
 import { IEscrow } from "../EscrowContractCard";
 import { useOperationHandling } from "../../hooks/useOperationHandling";
 

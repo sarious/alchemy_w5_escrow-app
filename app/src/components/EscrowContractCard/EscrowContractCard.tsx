@@ -10,7 +10,8 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
-import { approve, getWalletSigner } from "../../providers/getSigner";
+import { getWalletSigner } from "../../providers/getSigner";
+import { approve } from "../../contractApi/Escrow/approve";
 import { useEscrowActionsContext } from "../../providers/EscrowListProvider";
 import { getErrorDescription } from "../../utils/getErrorDescription";
 

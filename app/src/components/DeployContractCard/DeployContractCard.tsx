@@ -1,7 +1,7 @@
 import { FC, useRef, useState } from "react";
 import { DeployContractCardProps } from ".";
 import { ethers } from "ethers";
-import deploy from "../../deploy";
+import deployEscrowContract from "../../contractApi/Escrow/deploy";
 import {
   Button,
   Card,
@@ -26,7 +26,7 @@ const deployContract = async (
   value: ethers.BigNumber
 ) => {
   const signer = await getWalletSigner();
-  return deploy(signer, arbiter, beneficiary, value);
+  return deployEscrowContract(signer, arbiter, beneficiary, value);
 };
 
 export const DeployContractCard: FC<DeployContractCardProps> = (props) => {
